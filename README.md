@@ -7,5 +7,5 @@ to the clipboard.
 
 Other key changes:
 - All HTML messages are sanitized to prevent XSS attacks.
-- Updated to use .NET Core 3.1 and razor pages
+- Updated to use .NET 6 and razor pages
 
