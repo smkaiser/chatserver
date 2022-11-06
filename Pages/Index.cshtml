@@ -47,6 +47,17 @@
                     document.getElementById('sendmessage').click();
                 };
             }
+            // prevent sleeping tab
+            var lockResolver;
+            if (navigator && navigator.locks && navigator.locks.request) {
+                const promise = new Promise((res) => {
+                    lockResolver = res;
+                });
+
+                navigator.locks.request('chatserver_lock', { mode: "shared" }, () => {
+                    return promise;
+                });
+            }
             var name;
             document.onkeydown = KeyPress;
             document.addEventListener('DOMContentLoaded', function () {
