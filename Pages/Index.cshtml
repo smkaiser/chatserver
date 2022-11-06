@@ -123,11 +123,11 @@
                     document.getElementById("discussion").appendChild(div);
                 });
                 // Transport fallback functionality is now built into start.
-                connection.hub.disconnected(function() {
+                /* connection.hub.disconnected(function() {
                     setTimeout(function() {
                         connection.hub.start();
                     }, 5000); // Restart connection after 5 seconds.
-                });
+                }); */
                 connection.start()
                     .then(function () {
                         console.log('connection started');
