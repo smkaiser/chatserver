@@ -17,8 +17,8 @@
             </div>
                 <div class="row" >
                     <div class="eight columns">
+                        <input type="button" id="reconnect" value="Reconnect" style="display:none"/>
                         <textarea class="textinput" rows="4" id="message" autofocus></textarea>
-                        <input type="button" id="reconnect" value="Reconnect"/>
                     </div>
                     <div class="one column">
                         <input type="button" id="sendmessage" value="Send" />
@@ -106,7 +106,7 @@
 
                     document.getElementById("message").disabled = true;
                     document.getElementById("sendmessage").disabled = true;
-                    document.getElementById("reconnect").disabled = true;
+                    document.getElementById("reconnect").style.display = "none";
                    
 
                     const div = document.createElement("div");
@@ -120,7 +120,7 @@
                     connection.invoke("registerName", name);
                     document.getElementById("message").disabled = false;
                     document.getElementById("sendmessage").disabled = false;
-                    document.getElementById("reconnect").disabled = true;
+                    document.getElementById("reconnect").style.display = "none";
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -131,7 +131,7 @@
                     console.assert(connection.state === signalR.HubConnectionState.Disconnected);
 
                     document.getElementById("message").disabled = true;
-                    document.getElementById("reconnect").disabled = false;
+                    document.getElementById("reconnect").style.display = "block";
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -166,7 +166,7 @@
                                     connection.invoke("registerName", name);
                                     document.getElementById("message").disabled = false;
                                     document.getElementById("sendmessage").disabled = false;
-                                    document.getElementById("reconnect").disabled = true;
+                                    document.getElementById("reconnect").style.display = "none";
                                 })
                                 .catch(error => {
                                     console.error(error.message);
