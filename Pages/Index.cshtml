@@ -167,6 +167,10 @@
                                     document.getElementById("message").disabled = false;
                                     document.getElementById("sendmessage").disabled = false;
                                     document.getElementById("reconnect").style.display = "none";
+                                    const div = document.createElement("div");
+                                    div.className = "systemmessage";
+                                    div.textContent = `Connection reestablished. 😊`;
+                                    document.getElementById("discussion").appendChild(div);
                                 })
                                 .catch(error => {
                                     console.error(error.message);
