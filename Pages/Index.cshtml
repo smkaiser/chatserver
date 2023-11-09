@@ -106,6 +106,8 @@
 
                     document.getElementById("message").disabled = true;
                     document.getElementById("sendmessage").disabled = true;
+                    document.getElementById("reconnect").disabled = true;
+                   
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -118,6 +120,7 @@
                     connection.invoke("registerName", name);
                     document.getElementById("message").disabled = false;
                     document.getElementById("sendmessage").disabled = false;
+                    document.getElementById("reconnect").disabled = true;
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -128,6 +131,7 @@
                     console.assert(connection.state === signalR.HubConnectionState.Disconnected);
 
                     document.getElementById("message").disabled = true;
+                    document.getElementById("reconnect").disabled = false;
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
