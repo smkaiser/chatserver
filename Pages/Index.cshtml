@@ -160,7 +160,17 @@
                         });
                             document.getElementById('reconnect').addEventListener('click', function (event) {
                             // Call the Send method on the hub.
-                            connection.start();
+                            connection.start()
+                                .then(function () {
+                                    console.log('connection started');
+                                    connection.invoke("registerName", name);
+                                    document.getElementById("message").disabled = false;
+                                    document.getElementById("sendmessage").disabled = false;
+                                    document.getElementById("reconnect").disabled = true;
+                                })
+                                .catch(error => {
+                                    console.error(error.message);
+                                })
                             event.preventDefault();
                         });
 
