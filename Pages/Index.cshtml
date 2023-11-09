@@ -18,6 +18,7 @@
                 <div class="row" >
                     <div class="eight columns">
                         <textarea class="textinput" rows="4" id="message" autofocus></textarea>
+                        <input type="button" id="reconnect" value="Reconnect"/>
                     </div>
                     <div class="one column">
                         <input type="button" id="sendmessage" value="Send" />
@@ -153,6 +154,12 @@
                             sendMessage(document.getElementById('message').value, true)
                             event.preventDefault();
                         });
+                            document.getElementById('reconnect').addEventListener('click', function (event) {
+                            // Call the Send method on the hub.
+                            connection.hub.start();
+                            event.preventDefault();
+                        });
+
 
                     })
                     .catch(error => {
