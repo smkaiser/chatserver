@@ -6,9 +6,9 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HtmlSanitizer" Version="8.0.723" />
-    <PackageReference Include="Markdig" Version="0.30.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta2" />
+    <PackageReference Include="HtmlSanitizer" Version="8.0.746" />
+    <PackageReference Include="Markdig" Version="0.33.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>
