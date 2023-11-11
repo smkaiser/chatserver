@@ -84,7 +84,7 @@
                     var chatDiv = document.createElement("div");
                     chatDiv.className = "chat";
                     chatDiv.innerHTML = '<div class="user" style="background-color:' + colorFromString(name) + '"><strong>' + name
-                        + '</strong></div><div class="message">' + message + '</div><span class="copybutton" title="Copy to clipboard" onclick="copyMessage(this);">🗎</span></div>';
+                + '</strong></div><div class="message">' + message + '</div><span class="copybutton" title="Copy to clipboard" onclick="copyMessage(this);">&#x1f5d0;</span></div>';
                     document.getElementById('discussion').appendChild(chatDiv);
                 });
                 connection.on("nameList", function (names) {
@@ -211,7 +211,7 @@
                 var base = 160;
                 // get a checksum
                 var seed = 0; for (var i in input_str) { seed += input_str.charCodeAt(i) * (i + 1); }
-                // get deterministic (not random 😊) values based on name
+                // get deterministic values based on name
                 var rand_1 = Math.abs((Math.sin(seed++) * 10000)) % 256;
                 var rand_2 = Math.abs((Math.sin(seed++) * 10000)) % 256;
                 var rand_3 = Math.abs((Math.sin(seed++) * 10000)) % 256;
@@ -227,7 +227,7 @@
                     console.log("copied")
                     var buttons = document.querySelectorAll(".copybutton");
                     buttons.forEach(x => {
-                        x.innerText = "🗎";
+                        x.innerText = "&#x1f5d0;";
                     });
                     element.innerText = "✔"
                 }, function () {
