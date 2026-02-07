@@ -95,17 +95,116 @@ h5 {
 
 #discussion {
     /*overflow-y: scroll;*/
-    margin-right: 150px;
+    margin-right: 48px;
+    transition: margin-right 0.2s;
 }
 
+#discussion.sidebar-open {
+    margin-right: 180px;
+}
+
+/* Collapsed people bar */
+#people-bar {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    width: 44px;
+    height: 100%;
+    background: #f4f4f4;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+#people-count {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+#people-avatars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0;
+}
+
+.avatar.Disconnected {
+    opacity: 0.45;
+}
+
+/* Fly-out panel */
 #userlist {
     position: fixed;
-    background-color: #eee;
-    width: 150px;
-    height: 100%;
     top: 50px;
-    right: 0px;
-    padding: 3px 3px 3px 3px;
+    right: 0;
+    width: 175px;
+    height: 100%;
+    background-color: #eee;
+    padding: 0 3px 3px 3px;
+    z-index: 20;
+    transition: transform 0.2s;
+    box-shadow: -2px 0 6px rgba(0,0,0,0.12);
+}
+
+#userlist.collapsed {
+    transform: translateX(100%);
+    box-shadow: none;
+}
+
+#userlist-header {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+#userlist-header h5 {
+    flex: 1;
+    margin: 0.6em 0;
+}
+
+#people-pin, #people-close {
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 2px 4px;
+    user-select: none;
+    opacity: 0.5;
+}
+
+#people-pin:hover, #people-close:hover {
+    opacity: 1;
+}
+
+#people-pin.pinned {
+    opacity: 1;
+}
+
+#userlist-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+}
+
+#userlist-backdrop.hidden {
+    display: none;
 }
 
 .Disconnected {
@@ -266,4 +365,25 @@ textarea {
     max-height: 32px;
     max-width: 48px;
     border-radius: 3px;
+}
+
+@media (max-width: 600px) {
+    #discussion {
+        margin-right: 40px;
+    }
+    #discussion.sidebar-open {
+        margin-right: 40px;
+    }
+    #people-bar {
+        width: 36px;
+    }
+    .avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    #userlist {
+        width: 70vw;
+        max-width: 250px;
+    }
 }

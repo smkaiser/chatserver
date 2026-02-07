@@ -12,9 +12,19 @@
         </div>
         <div class="row">
             <div id="discussion" class="ten columns"></div>
-            <div id="userlist">
-                <h5>people</h5><div id="users"></div>
+            <div id="people-bar" title="Show people">
+                <div id="people-avatars"></div>
+                <span id="people-count">0</span>
             </div>
+            <div id="userlist" class="collapsed">
+                <div id="userlist-header">
+                    <h5>people</h5>
+                    <span id="people-pin" title="Pin sidebar">📌</span>
+                    <span id="people-close" title="Close">✕</span>
+                </div>
+                <div id="users"></div>
+            </div>
+            <div id="userlist-backdrop" class="hidden"></div>
                 <div class="row" >
                     <div class="eight columns">
                         <input type="button" id="reconnect" value="Reconnect" style="display:none"/>
@@ -134,6 +144,7 @@
                 connection.on("nameList", function (names) {
                     names = JSON.parse(names);
                     console.log(names);
+                    // Render full user list in panel
                     var nameDiv = document.getElementById("users");
                     nameDiv.innerHTML = "";
                     names.forEach(function (x) {
@@ -145,6 +156,18 @@
                         newDiv.classList += " " + x.Status;
                         nameDiv.appendChild(newDiv);
                     });
+                    // Render collapsed bar avatars
+                    var avatarDiv = document.getElementById("people-avatars");
+                    avatarDiv.innerHTML = "";
+                    names.forEach(function (x) {
+                        var a = document.createElement("span");
+                        a.className = "avatar" + (x.Status === "Disconnected" ? " Disconnected" : "");
+                        a.style.backgroundColor = colorFromString(x.Name);
+                        a.textContent = x.Name.charAt(0).toUpperCase();
+                        a.title = x.Name;
+                        avatarDiv.appendChild(a);
+                    });
+                    document.getElementById("people-count").textContent = names.length;
                     // Enable file upload only when at least one other person is present
                     var uploadLabel = document.getElementById('uploadlabel');
                     var fileUpload = document.getElementById('fileupload');
@@ -309,6 +332,40 @@
                 }
 
                 document.getElementById('staged-file-remove').addEventListener('click', clearStagedFile);
+
+                // People sidebar toggle/pin logic
+                var sidebarPinned = false;
+                var userlistEl = document.getElementById('userlist');
+                var backdrop = document.getElementById('userlist-backdrop');
+                var pinBtn = document.getElementById('people-pin');
+
+                function openSidebar() {
+                    userlistEl.classList.remove('collapsed');
+                    if (!sidebarPinned) backdrop.classList.remove('hidden');
+                    document.getElementById('discussion').classList.toggle('sidebar-open', sidebarPinned);
+                }
+                function closeSidebar() {
+                    if (sidebarPinned) return;
+                    userlistEl.classList.add('collapsed');
+                    backdrop.classList.add('hidden');
+                    document.getElementById('discussion').classList.remove('sidebar-open');
+                }
+                function togglePin() {
+                    sidebarPinned = !sidebarPinned;
+                    pinBtn.classList.toggle('pinned', sidebarPinned);
+                    backdrop.classList.toggle('hidden', true);
+                    document.getElementById('discussion').classList.toggle('sidebar-open', sidebarPinned);
+                }
+
+                document.getElementById('people-bar').addEventListener('click', openSidebar);
+                document.getElementById('people-close').addEventListener('click', function() {
+                    if (sidebarPinned) { togglePin(); }
+                    closeSidebar();
+                    userlistEl.classList.add('collapsed');
+                    document.getElementById('discussion').classList.remove('sidebar-open');
+                });
+                pinBtn.addEventListener('click', togglePin);
+                backdrop.addEventListener('click', closeSidebar);
 
                 function handleFile(file) {
                     if (!file) return;
