@@ -19,6 +19,11 @@
                     <div class="eight columns">
                         <input type="button" id="reconnect" value="Reconnect" style="display:none"/>
                         <textarea class="textinput" rows="4" id="message" autofocus></textarea>
+                        <div id="file-staging" style="display:none">
+                            <span id="staged-file-preview"></span>
+                            <span id="staged-file-name"></span>
+                            <span id="staged-file-remove" title="Remove file">✕</span>
+                        </div>
                     </div>
                     <div class="one column">
                         <input type="button" id="sendmessage" value="Send" />
@@ -257,6 +262,11 @@
                     });
                 function sendMessage(message, raw) {
                                 var messageInput = document.getElementById('message');
+                                // Send staged file if present
+                                if (stagedFile) {
+                                    connection.invoke('sendFile', name, stagedFile.name, stagedFile.data);
+                                    clearStagedFile();
+                                }
                                 var msg = messageInput.value;
                                 if (msg.length > 0) {
                                     if (raw && !msg.startsWith("```\n")) {
@@ -270,6 +280,36 @@
                                 messageInput.focus();
                 }
                 var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+                var stagedFile = null; // { name, data }
+
+                function stageFile(fileName, fileData) {
+                    stagedFile = { name: fileName, data: fileData };
+                    var staging = document.getElementById('file-staging');
+                    var preview = document.getElementById('staged-file-preview');
+                    document.getElementById('staged-file-name').textContent = fileName;
+                    preview.innerHTML = '';
+                    if (fileData.match(/^data:image\//)) {
+                        var img = document.createElement('img');
+                        img.src = fileData;
+                        img.className = 'staged-thumb';
+                        preview.appendChild(img);
+                    } else {
+                        preview.textContent = '📎';
+                    }
+                    staging.style.display = 'flex';
+                    document.getElementById('sendrawmessage').disabled = true;
+                }
+
+                function clearStagedFile() {
+                    stagedFile = null;
+                    document.getElementById('file-staging').style.display = 'none';
+                    document.getElementById('staged-file-preview').innerHTML = '';
+                    document.getElementById('staged-file-name').textContent = '';
+                    document.getElementById('sendrawmessage').disabled = false;
+                }
+
+                document.getElementById('staged-file-remove').addEventListener('click', clearStagedFile);
+
                 function handleFile(file) {
                     if (!file) return;
                     if (document.getElementById('uploadlabel').classList.contains('disabled')) {
@@ -282,7 +322,7 @@
                     }
                     var reader = new FileReader();
                     reader.onload = function() {
-                        connection.invoke('sendFile', name, file.name, reader.result);
+                        stageFile(file.name, reader.result);
                     };
                     reader.readAsDataURL(file);
                 }
@@ -310,16 +350,47 @@
             }
             function copyMessage(element) {
                 var msg = element.previousElementSibling;
-                navigator.clipboard.writeText(msg.innerText).then(function () {
-                    console.log("copied")
-                    var buttons = document.querySelectorAll(".copybutton");
-                    buttons.forEach(x => {
-                        x.innerText = "🗐";
-                    });
-                    element.innerText = "✔"
-                }, function () {
-                    console.log("copy failed");
+                var img = msg.querySelector('img');
+                if (img) {
+                    fetch(img.src)
+                        .then(function(r) { return r.blob(); })
+                        .then(function(blob) {
+                            // Ensure we use a supported MIME type for clipboard
+                            var type = blob.type === 'image/png' ? 'image/png' : 'image/png';
+                            if (blob.type !== 'image/png') {
+                                // Convert to PNG via canvas for clipboard compatibility
+                                var canvas = document.createElement('canvas');
+                                var tmpImg = new Image();
+                                tmpImg.onload = function() {
+                                    canvas.width = tmpImg.width;
+                                    canvas.height = tmpImg.height;
+                                    canvas.getContext('2d').drawImage(tmpImg, 0, 0);
+                                    canvas.toBlob(function(pngBlob) {
+                                        navigator.clipboard.write([
+                                            new ClipboardItem({ 'image/png': pngBlob })
+                                        ]).then(function() { markCopied(element); },
+                                               function() { console.log("copy failed"); });
+                                    }, 'image/png');
+                                };
+                                tmpImg.src = img.src;
+                            } else {
+                                navigator.clipboard.write([
+                                    new ClipboardItem({ 'image/png': blob })
+                                ]).then(function() { markCopied(element); },
+                                       function() { console.log("copy failed"); });
+                            }
+                        });
+                } else {
+                    navigator.clipboard.writeText(msg.innerText).then(
+                        function () { markCopied(element); },
+                        function () { console.log("copy failed"); }
+                    );
                 }
-                );
+            }
+            function markCopied(element) {
+                console.log("copied");
+                var buttons = document.querySelectorAll(".copybutton");
+                buttons.forEach(x => { x.innerText = "🗐"; });
+                element.innerText = "✔";
             }
         </script>
