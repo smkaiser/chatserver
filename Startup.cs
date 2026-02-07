@@ -32,7 +32,7 @@ namespace chatserver
             // workaround for hub options https://github.com/dotnet/aspnetcore/issues/15085
             services.Configure<HubOptions>(options =>
             {
-                options.MaximumReceiveMessageSize = 1048576;
+                options.MaximumReceiveMessageSize = 10485760; // 10MB for file sharing
             });
             services.AddRazorPages();
         }
