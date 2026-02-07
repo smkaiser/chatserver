@@ -23,6 +23,8 @@
                     <div class="one column">
                         <input type="button" id="sendmessage" value="Send" />
                         <input type="button" id="sendrawmessage" title="Send as raw text" value="Send Code" />
+                        <label id="uploadlabel" for="fileupload" class="disabled" title="File sharing requires another person in chat">+</label>
+                        <input type="file" id="fileupload" style="display:none" disabled />
                     </div>
                 </div>
                 <div class="row" >
@@ -87,6 +89,43 @@
                 + '</strong></div><div class="message">' + message + '</div><span class="copybutton" title="Copy to clipboard" onclick="copyMessage(this);">&#x1f5d0;</span></div>';
                     document.getElementById('discussion').appendChild(chatDiv);
                 });
+                connection.on('broadcastFile', function (senderName, fileName, fileData) {
+                    var chatDiv = document.createElement('div');
+                    chatDiv.className = 'chat';
+
+                    var userDiv = document.createElement('div');
+                    userDiv.className = 'user';
+                    userDiv.style.backgroundColor = colorFromString(senderName);
+                    userDiv.innerHTML = '<strong>' + senderName + '</strong>';
+
+                    var msgDiv = document.createElement('div');
+                    msgDiv.className = 'message';
+                    if (fileData.match(/^data:image\//)) {
+                        var img = document.createElement('img');
+                        img.src = fileData;
+                        img.alt = fileName;
+                        img.className = 'chat-image';
+                        msgDiv.appendChild(img);
+                    } else {
+                        var link = document.createElement('a');
+                        link.href = fileData;
+                        link.download = fileName;
+                        link.className = 'file-link';
+                        link.textContent = '\ud83d\udcce ' + fileName;
+                        msgDiv.appendChild(link);
+                    }
+
+                    var copyBtn = document.createElement('span');
+                    copyBtn.className = 'copybutton';
+                    copyBtn.title = 'Copy to clipboard';
+                    copyBtn.onclick = function() { copyMessage(this); };
+                    copyBtn.textContent = '\ud83d\uddd0';
+
+                    chatDiv.appendChild(userDiv);
+                    chatDiv.appendChild(msgDiv);
+                    chatDiv.appendChild(copyBtn);
+                    document.getElementById('discussion').appendChild(chatDiv);
+                });
                 connection.on("nameList", function (names) {
                     names = JSON.parse(names);
                     console.log(names);
@@ -101,6 +140,16 @@
                         newDiv.classList += " " + x.Status;
                         nameDiv.appendChild(newDiv);
                     });
+                    // Enable file upload only when at least one other person is present
+                    var uploadLabel = document.getElementById('uploadlabel');
+                    var fileUpload = document.getElementById('fileupload');
+                    if (names.length > 1) {
+                        uploadLabel.classList.remove('disabled');
+                        fileUpload.disabled = false;
+                    } else {
+                        uploadLabel.classList.add('disabled');
+                        fileUpload.disabled = true;
+                    }
                 connection.onreconnecting(error => {
                     console.assert(connection.state === signalR.HubConnectionState.Reconnecting);
 
@@ -181,6 +230,27 @@
                         });
 
 
+                        // Paste binary files (images, etc.) into chat
+                        messageInput.addEventListener('paste', function(e) {
+                            var items = e.clipboardData && e.clipboardData.items;
+                            if (!items) return;
+                            for (var i = 0; i < items.length; i++) {
+                                if (items[i].kind === 'file') {
+                                    e.preventDefault();
+                                    handleFile(items[i].getAsFile());
+                                    return;
+                                }
+                            }
+                        });
+
+                        // "+" button file upload
+                        document.getElementById('fileupload').addEventListener('change', function() {
+                            if (this.files && this.files[0]) {
+                                handleFile(this.files[0]);
+                                this.value = '';
+                            }
+                        });
+
                     })
                     .catch(error => {
                         console.error(error.message);
@@ -198,6 +268,23 @@
                                 // Clear text box and reset focus for next comment.
                                 messageInput.value = '';
                                 messageInput.focus();
+                }
+                var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+                function handleFile(file) {
+                    if (!file) return;
+                    if (document.getElementById('uploadlabel').classList.contains('disabled')) {
+                        alert('File sharing requires at least one other person in the chat.');
+                        return;
+                    }
+                    if (file.size > MAX_FILE_SIZE) {
+                        alert('File is too large. Maximum size is 5MB.');
+                        return;
+                    }
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        connection.invoke('sendFile', name, file.name, reader.result);
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
             function getUserName() {

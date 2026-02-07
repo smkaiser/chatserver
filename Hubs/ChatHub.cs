@@ -18,6 +18,13 @@ namespace chatserver.Hubs
             await Clients.All.SendAsync("broadcastMessage", Util.Sanitize(name), Util.MdToHtml(message));
         }
 
+        public async Task SendFile(string name, string fileName, string fileData)
+        {
+            if (string.IsNullOrEmpty(fileData) || !fileData.StartsWith("data:"))
+                return;
+            await Clients.All.SendAsync("broadcastFile", Util.Sanitize(name), Util.Sanitize(fileName), fileData);
+        }
+
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
