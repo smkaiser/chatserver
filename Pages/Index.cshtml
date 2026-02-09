@@ -101,7 +101,7 @@
                     var chatDiv = document.createElement("div");
                     chatDiv.className = "chat";
                     chatDiv.innerHTML = '<div class="user" style="background-color:' + colorFromString(name) + '"><strong>' + name
-                + '</strong></div><div class="message">' + message + '</div><span class="copybutton" title="Copy to clipboard" onclick="copyMessage(this);">&#x1f5d0;</span></div>';
+                + '</strong></div><div class="message">' + message + '</div><span class="copybutton" title="Copy to clipboard" onclick="copyMessage(this);">&#x1f4cb;</span></div>';
                     document.getElementById('discussion').appendChild(chatDiv);
                 });
                 connection.on('broadcastFile', function (senderName, fileName, fileData) {
@@ -134,7 +134,7 @@
                     copyBtn.className = 'copybutton';
                     copyBtn.title = 'Copy to clipboard';
                     copyBtn.onclick = function() { copyMessage(this); };
-                    copyBtn.textContent = '\ud83d\uddd0';
+                    copyBtn.textContent = '\ud83d\udccb';
 
                     chatDiv.appendChild(userDiv);
                     chatDiv.appendChild(msgDiv);
@@ -475,7 +475,7 @@
             function markCopied(element) {
                 console.log("copied");
                 var buttons = document.querySelectorAll(".copybutton");
-                buttons.forEach(x => { x.innerText = "🗐"; });
+                buttons.forEach(x => { x.innerText = "📋"; });
                 element.innerText = "✔";
             }
         </script>
