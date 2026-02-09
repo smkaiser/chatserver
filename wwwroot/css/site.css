@@ -224,6 +224,25 @@ h5 {
     color: #555;
 }
 
+#conn-status {
+    font-size: 1.4rem;
+    vertical-align: middle;
+    margin-left: 4px;
+    transition: color 0.3s;
+}
+
+#conn-status.connected {
+    color: #4caf50;
+}
+
+#conn-status.reconnecting {
+    color: #ff9800;
+}
+
+#conn-status.disconnected {
+    color: #f44336;
+}
+
 #input {
     margin-top: 5px;
 }

@@ -7,7 +7,7 @@
     <div class="container">
         <div class="row">
             <div class="eight columns">
-                <h5>— Ephemeral Chat —</h5>
+                <h5>— Ephemeral Chat — <span id="conn-status" title="Connected">✔</span></h5>
             </div>
         </div>
         <div class="row">
@@ -81,6 +81,20 @@
             document.addEventListener('DOMContentLoaded', function () {
 
                 var messageInput = document.getElementById('message');
+                var statusEl = document.getElementById('conn-status');
+
+                function setConnectedUI(connected) {
+                    document.getElementById("message").disabled = !connected;
+                    document.getElementById("sendmessage").disabled = !connected;
+                    document.getElementById("sendrawmessage").disabled = !connected;
+                    document.getElementById("uploadlabel").classList.toggle("disabled", !connected);
+                    document.getElementById("fileupload").disabled = !connected;
+                    if (connected) {
+                        statusEl.textContent = "✔";
+                        statusEl.title = "Connected";
+                        statusEl.className = "connected";
+                    }
+                }
 
                 // Get the user name and store it to prepend to messages.
                 // Set initial focus to message input box.
@@ -181,10 +195,11 @@
                 connection.onreconnecting(error => {
                     console.assert(connection.state === signalR.HubConnectionState.Reconnecting);
 
-                    document.getElementById("message").disabled = true;
-                    document.getElementById("sendmessage").disabled = true;
+                    setConnectedUI(false);
+                    statusEl.textContent = "⟳";
+                    statusEl.title = "Reconnecting...";
+                    statusEl.className = "reconnecting";
                     document.getElementById("reconnect").style.display = "none";
-                   
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -195,8 +210,7 @@
                 connection.onreconnected(connectionId => {
                     console.assert(connection.state === signalR.HubConnectionState.Connected);
                     connection.invoke("registerName", name);
-                    document.getElementById("message").disabled = false;
-                    document.getElementById("sendmessage").disabled = false;
+                    setConnectedUI(true);
                     document.getElementById("reconnect").style.display = "none";
 
                     const div = document.createElement("div");
@@ -207,8 +221,10 @@
                 connection.onclose(error => {
                     console.assert(connection.state === signalR.HubConnectionState.Disconnected);
 
-                    document.getElementById("message").disabled = true;
-                    document.getElementById("sendmessage").disabled = true;
+                    setConnectedUI(false);
+                    statusEl.textContent = "✘";
+                    statusEl.title = "Disconnected — reconnecting...";
+                    statusEl.className = "disconnected";
 
                     const div = document.createElement("div");
                     div.className = "systemmessage";
@@ -220,14 +236,16 @@
                     var maxDelay = 30000;
                     function autoReconnect() {
                         console.log(`Auto-reconnecting in ${retryDelay}ms...`);
+                        statusEl.textContent = "⟳";
+                        statusEl.title = "Reconnecting...";
+                        statusEl.className = "reconnecting";
                         setTimeout(function() {
                             if (connection.state === signalR.HubConnectionState.Disconnected) {
                                 connection.start()
                                     .then(function() {
                                         console.log('connection reestablished');
                                         connection.invoke("registerName", name);
-                                        document.getElementById("message").disabled = false;
-                                        document.getElementById("sendmessage").disabled = false;
+                                        setConnectedUI(true);
                                         document.getElementById("reconnect").style.display = "none";
                                         const div = document.createElement("div");
                                         div.className = "systemmessage";
@@ -236,6 +254,9 @@
                                     })
                                     .catch(function(err) {
                                         console.error('Reconnect failed:', err.message);
+                                        statusEl.textContent = "✘";
+                                        statusEl.title = "Disconnected — reconnecting...";
+                                        statusEl.className = "disconnected";
                                         retryDelay = Math.min(retryDelay * 2, maxDelay);
                                         autoReconnect();
                                     });
@@ -253,6 +274,7 @@
                 connection.start()
                     .then(function () {
                         console.log('connection started');
+                        setConnectedUI(true);
                         connection.invoke("registerName", name);
                         document.getElementById('sendmessage').addEventListener('click', function (event) {
                             // Call the Send method on the hub.
@@ -265,14 +287,12 @@
                             event.preventDefault();
                         });
                             document.getElementById('reconnect').addEventListener('click', function (event) {
-                            // Call the Send method on the hub.
                                 document.getElementById("reconnect").className = "disabled";
                                 connection.start()
                                 .then(function () {
                                     console.log('connection started');
                                     connection.invoke("registerName", name);
-                                    document.getElementById("message").disabled = false;
-                                    document.getElementById("sendmessage").disabled = false;
+                                    setConnectedUI(true);
                                     document.getElementById("reconnect").style.display = "none";
                                     const div = document.createElement("div");
                                     div.className = "systemmessage";
